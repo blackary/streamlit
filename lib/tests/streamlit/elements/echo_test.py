@@ -82,12 +82,17 @@ class MyClass(object):
             ("code_location below", {"location": "below"}, 1, 0),
         ]
     )
-    def test_echo_unindent(self, _, echo_kwargs, echo_index, output_index):
-        # The empty lines below are part of the test. Do not remove them.
-        with st.echo(**echo_kwargs):
-
+    def test_echo_unindent(
+        self,
+        _,
+        echo_kwargs_very_very_long_name_very_long_very_very_very_very_very_very_long,
+        echo_index,
+        output_index,
+    ):
+        with st.echo(
+            **echo_kwargs_very_very_long_name_very_long_very_very_very_very_very_very_long
+        ):
             st.write("Hello")
-
             "hi"
 
             def foo(x):
