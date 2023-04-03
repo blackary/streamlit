@@ -102,6 +102,56 @@ _INSTRUCTIONS_TEXT = """
 }
 
 
+def save_email(email):
+    from datetime import datetime
+
+    import requests
+
+    headers = {
+        "authority": "api.segment.io",
+        "accept": "*/*",
+        "accept-language": "en-US,en;q=0.9",
+        "content-type": "text/plain",
+        "origin": "http://localhost:8501",
+        "referer": "http://localhost:8501/",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "cross-site",
+        "user-agent": "",
+    }
+
+    data = {
+        "timestamp": datetime.now().isoformat(),
+        "integrations": {},
+        "userId": email,
+        "anonymousId": "",
+        "type": "identify",
+        "traits": {
+            "authoremail": email,
+        },
+        "context": {
+            "page": {
+                "path": "/",
+                "referrer": "",
+                "search": "",
+                "title": "",
+                "url": "http://localhost:8501/",
+            },
+            "userAgent": "",
+            "locale": "en-US",
+            "library": {"name": "requests", "version": "1"},
+        },
+        "writeKey": "iCkMy7ymtJ9qYzQRXkQpnAJEq7D4NyMU",
+        "sentAt": datetime.now().isoformat(),
+        "_metadata": {"bundled": ["Segment.io"], "unbundled": [], "bundledIds": []},
+    }
+
+    response = requests.post(
+        "https://api.segment.io/v1/i", headers=headers, data=str(data)
+    )
+
+    response.raise_for_status()
+
+
 class Credentials(object):
     """Credentials class."""
 
@@ -193,7 +243,7 @@ class Credentials(object):
             LOGGER.error("Error removing credentials file: %s" % e)
 
     def save(self):
-        """Save to toml file."""
+        """Save to toml file and record."""
         if self.activation is None:
             return
 
@@ -204,6 +254,11 @@ class Credentials(object):
         data = {"email": self.activation.email}
         with open(self._conf_file, "w") as f:
             toml.dump({"general": data}, f)
+
+        try:
+            save_email(self.activation.email)
+        except Exception as e:
+            LOGGER.error("Error saving email: %s" % e)
 
     def activate(self, show_instructions: bool = True) -> None:
         """Activate Streamlit.
